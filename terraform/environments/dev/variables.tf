@@ -1,12 +1,15 @@
 variable "project_name" {
+  type    = string
   default = "aws-active-directory-lab"
 }
 
 variable "environment" {
+  type    = string
   default = "dev"
 }
 
 variable "aws_region" {
+  type    = string
   default = "ap-south-1"
 }
 
