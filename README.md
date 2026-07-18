@@ -61,3 +61,4 @@ This environment is designed for lab and testing purposes. Do not deploy this co
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+# aws-active-directory-lab
