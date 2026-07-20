@@ -21,7 +21,7 @@ variable "aws_profile" {
 variable "dc01_instance_type" {
   description = "Instance type for Domain Controller"
   type        = string
-  default     = "t3.large"
+  default     = "t3.micro"
 }
 
 variable "dc01_private_ip" {
