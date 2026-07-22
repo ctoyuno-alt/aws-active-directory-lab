@@ -29,12 +29,12 @@ resource "aws_instance" "this" {
   }
 
   tags = merge(
-    var.tags,
-    {
-      Name = "${var.project_name}-${var.environment}-dc01"
-      Role = "DomainController"
-    }
-  )
+  var.tags,
+  {
+    Name = "${var.project_name}-${var.environment}-${lower(var.hostname)}"
+    Role = var.role
+  }
+)
 
   lifecycle {
     prevent_destroy = true

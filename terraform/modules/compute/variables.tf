@@ -6,10 +6,6 @@ variable "environment" {
   type = string
 }
 
-variable "name" {
-  type = string
-}
-
 variable "ami_id" {
   type = string
 }
@@ -50,4 +46,14 @@ variable "tags" {
 variable "key_name" {
   type    = string
   default = null
+}
+
+variable "hostname" {
+  description = "Hostname of the Windows server"
+  type        = string
+}
+
+variable "role" {
+  description = "Logical server role"
+  type        = string
 }

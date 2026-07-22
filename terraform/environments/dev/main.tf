@@ -56,7 +56,6 @@ module "dc01" {
 
   project_name = var.project_name
   environment  = var.environment
-  name         = "dc01"
 
   ami_id        = data.aws_ami.windows_server.id
   instance_type = var.dc01_instance_type
@@ -75,6 +74,10 @@ module "dc01" {
   user_data = file("${path.root}/../../../userdata/windows/windows-bootstrap.ps1")
 
   tags = local.common_tags
+
+  hostname = "DC01"
+
+  role = "DomainController"
 }
 
 module "endpoints" {
