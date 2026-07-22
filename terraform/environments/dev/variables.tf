@@ -41,3 +41,21 @@ variable "dc01_key_name" {
   type        = string
   default     = null
 }
+
+variable "dc02_instance_type" {
+  description = "EC2 instance type for DC02"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "dc02_private_ip" {
+  description = "Private IP address for DC02"
+  type        = string
+  default     = "10.10.20.10"
+}
+
+variable "dc02_root_volume_size" {
+  description = "Root volume size for DC02"
+  type        = number
+  default     = 100
+}
