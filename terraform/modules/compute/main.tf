@@ -31,7 +31,8 @@ resource "aws_instance" "this" {
   tags = merge(
     var.tags,
     {
-      Name = local.instance_name
+      Name = "${var.project_name}-${var.environment}-dc01"
+      Role = "DomainController"
     }
   )
 

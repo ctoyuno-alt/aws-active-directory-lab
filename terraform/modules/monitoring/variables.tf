@@ -3,11 +3,6 @@ variable "project_name" {
   type        = string
 }
 
-variable "instance_id" {
-  description = "Windows instance to configure"
-  type        = string
-}
-
 variable "environment" {
   description = "Deployment environment"
   type        = string
