@@ -59,3 +59,12 @@ variable "dc02_root_volume_size" {
   type        = number
   default     = 100
 }
+
+variable "domain_admin_username" {
+  type = string
+}
+
+variable "domain_admin_password" {
+  type      = string
+  sensitive = true
+}
