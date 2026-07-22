@@ -1,0 +1,75 @@
+{
+    "agent": {
+        "metrics_collection_interval": 60,
+        "run_as_user": "Administrator"
+    },
+    "metrics": {
+        "namespace": "ActiveDirectoryLab",
+        "append_dimensions": {
+            "InstanceId": "${aws:InstanceId}"
+        },
+        "metrics_collected": {
+            "LogicalDisk": {
+                "measurement": [
+                    "% Free Space",
+                    "Free Megabytes"
+                ],
+                "resources": [
+                    "*"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "Memory": {
+                "measurement": [
+                    "% Committed Bytes In Use"
+                ],
+                "metrics_collection_interval": 60
+            },
+            "Processor": {
+                "measurement": [
+                    "% Processor Time"
+                ],
+                "resources": [
+                    "_Total"
+                ],
+                "metrics_collection_interval": 60
+            }
+        }
+    },
+    "logs": {
+        "logs_collected": {
+            "windows_events": {
+                "collect_list": [
+                    {
+                        "event_name": "System",
+                        "event_levels": [
+                            "ERROR",
+                            "WARNING",
+                            "INFORMATION"
+                        ],
+                        "log_group_name": "/aws/ec2/windows/domain-controller",
+                        "log_stream_name": "{instance_id}/System"
+                    },
+                    {
+                        "event_name": "Application",
+                        "event_levels": [
+                            "ERROR",
+                            "WARNING"
+                        ],
+                        "log_group_name": "/aws/ec2/windows/domain-controller",
+                        "log_stream_name": "{instance_id}/Application"
+                    },
+                    {
+                        "event_name": "Security",
+                        "event_levels": [
+                            "ERROR",
+                            "WARNING"
+                        ],
+                        "log_group_name": "/aws/ec2/windows/domain-controller",
+                        "log_stream_name": "{instance_id}/Security"
+                    }
+                ]
+            }
+        }
+    }
+}

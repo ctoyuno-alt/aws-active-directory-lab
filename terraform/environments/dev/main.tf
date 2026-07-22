@@ -37,6 +37,17 @@ module "security" {
   tags = local.common_tags
 }
 
+module "monitoring" {
+  source = "../../modules/monitoring"
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  log_retention_days = 30
+
+  tags = local.common_tags
+}
+
 module "dc01" {
   source = "../../modules/compute"
 
