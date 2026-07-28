@@ -15,7 +15,7 @@ variable "aws_region" {
 
 variable "aws_profile" {
   type    = string
-  default = ""
+  default = "aws-ad-lab"
 }
 
 variable "dc01_instance_type" {
