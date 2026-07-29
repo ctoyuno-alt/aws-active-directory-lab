@@ -18,7 +18,7 @@ module "dc02" {
 
   root_volume_size = var.dc02_root_volume_size
 
-  user_data = file("${path.root}/../../../userdata/windows/windows-bootstrap.ps1")
+  user_data = file("${path.root}/../../../userdata/windows/join-dc02.ps1")
 
   tags = local.common_tags
 
