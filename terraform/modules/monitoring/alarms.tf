@@ -22,8 +22,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "memory_high" {
-  alarm_name          = "${var.project_name}-${var.environment}-dc-memory-high"
-  alarm_description   = "High memory utilization on Domain Controller"
+  alarm_name        = "${var.project_name}-${var.environment}-dc-memory-high"
+  alarm_description = "High memory utilization on Domain Controller"
 
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2

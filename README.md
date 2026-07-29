@@ -30,6 +30,9 @@ The infrastructure deployed by this repository includes:
 ## Repository Structure
 
 ```text
+├── .github/
+│   └── workflows/
+│       └── ci.yml                # CI automation running validate.sh & lint.sh
 ├── bootstrap/                    # Terraform state initialization (S3 bucket & DynamoDB lock table)
 ├── cloudwatch/                   # CloudWatch agent JSON metrics and Windows Event Log config
 ├── docs/                         # Detailed architecture, setup guides, and walkthroughs
@@ -42,7 +45,17 @@ The infrastructure deployed by this repository includes:
 │   ├── common/                   # Reusable helper scripts (DNS, Credentials, Health, Join, Rename)
 │   ├── dc01/                     # DC01 forest promotion and admin reset scripts
 │   └── dc02/                     # DC02 additional DC promotion and replication validation
-├── scripts/                      # Helper automation scripts
+├── scripts/                      # Reusable Linux automation & wrapper scripts
+│   ├── common.sh                 # Shared bash library (colors, logging, AWS CLI wrapper)
+│   ├── connect-ssm.sh            # SSM Session Manager wrapper for DC01/DC02
+│   ├── deploy.sh                 # Environment deployment & state bootstrap wrapper
+│   ├── destroy.sh                # Environment tear-down & destroy wrapper
+│   ├── fmt.sh                    # Terraform recursive code formatting helper (terraform fmt -recursive)
+│   ├── get-credentials.sh        # Fetches AD admin credentials from Parameter Store
+│   ├── health-check.sh           # Remote AD health diagnostic execution tool
+│   ├── lint.sh                   # Multi-language linter suite (Terraform, ShellCheck, PSScriptAnalyzer)
+│   ├── validate.sh               # Pre-commit Terraform validation runner (fmt, validate, plan)
+│   └── lib/                      # Sub-libraries (aws.sh for instance lookup)
 ├── terraform/                    # Infrastructure as Code
 │   ├── environments/
 │   │   └── dev/                  # Development environment configuration

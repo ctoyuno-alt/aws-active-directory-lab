@@ -11,11 +11,11 @@ resource "aws_cloudwatch_dashboard" "domain_controller" {
         height = 6
 
         properties = {
-          title   = "CPU Utilization"
-          view    = "timeSeries"
-          region  = var.aws_region
-          stat    = "Average"
-          period  = 300
+          title  = "CPU Utilization"
+          view   = "timeSeries"
+          region = var.aws_region
+          stat   = "Average"
+          period = 300
 
           metrics = [
             [
@@ -36,11 +36,11 @@ resource "aws_cloudwatch_dashboard" "domain_controller" {
         height = 6
 
         properties = {
-          title   = "Memory Usage"
-          view    = "timeSeries"
-          region  = var.aws_region
-          stat    = "Average"
-          period  = 300
+          title  = "Memory Usage"
+          view   = "timeSeries"
+          region = var.aws_region
+          stat   = "Average"
+          period = 300
 
           metrics = [
             [
@@ -61,11 +61,11 @@ resource "aws_cloudwatch_dashboard" "domain_controller" {
         height = 6
 
         properties = {
-          title   = "Disk Free Space"
-          view    = "timeSeries"
-          region  = var.aws_region
-          stat    = "Average"
-          period  = 300
+          title  = "Disk Free Space"
+          view   = "timeSeries"
+          region = var.aws_region
+          stat   = "Average"
+          period = 300
 
           metrics = [
             [
@@ -87,11 +87,11 @@ resource "aws_cloudwatch_dashboard" "domain_controller" {
         height = 6
 
         properties = {
-          title   = "EC2 Status Check"
-          view    = "timeSeries"
-          region  = var.aws_region
-          stat    = "Maximum"
-          period  = 60
+          title  = "EC2 Status Check"
+          view   = "timeSeries"
+          region = var.aws_region
+          stat   = "Maximum"
+          period = 60
 
           metrics = [
             [

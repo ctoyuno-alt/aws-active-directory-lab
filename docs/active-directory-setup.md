@@ -84,15 +84,41 @@ The PowerShell scripts in `powershell/` automate the setup of the Active Directo
 
 ---
 
+## Instance Directory Structure & Script Locations
+
+During provisioning, PowerShell scripts are deployed to a standardized automation location on Windows instances:
+
+- **Primary Automation Path**: `C:\Automation\powershell\`
+  - `C:\Automation\powershell\common\Test-ADHealth.ps1`
+  - `C:\Automation\powershell\common\Get-DomainCredential.ps1`
+- **Legacy / Bootstrap Path**: `C:\bootstrap\`
+
+---
+
 ## Health Check & Verification Commands
 
-After deployment, execute the following health checks via AWS SSM Session Manager:
+### Method 1: Dynamic Execution via Bash Wrapper (Recommended)
 
-### Run Health Diagnostic
+Run `./scripts/health-check.sh` from your local Linux workstation. The script dynamically streams the local repository script content directly to the target instance via AWS SSM:
+
+```bash
+# Execute health check on DC01
+./scripts/health-check.sh DC01
+
+# Execute custom script on DC02
+./scripts/health-check.sh DC02 --script ./powershell/dc02/Validate-Replication.ps1
+```
+
+### Method 2: Manual Execution via SSM Session Manager
+
+Connect to the instance via SSM Session Manager and invoke the script directly from the standard automation path:
 
 ```powershell
-# Execute health check script
-.\powershell\common\Test-ADHealth.ps1
+# Execute health check script on instance
+& C:\Automation\powershell\common\Test-ADHealth.ps1
+
+# Execute replication validation script on DC02
+& C:\Automation\powershell\dc02\Validate-Replication.ps1
 ```
 
 **Expected Output**:
@@ -100,13 +126,6 @@ After deployment, execute the following health checks via AWS SSM Session Manage
 - Active Directory Module: **Loaded**
 - DCDiag Services & Replication: **Pass**
 - Overall AD Health: **PASS**
-
-### Run Replication Diagnostic
-
-```powershell
-# Execute replication validation script on DC02
-.\powershell\dc02\Validate-Replication.ps1
-```
 
 ---
 *Next guide: [Security & Networking Guide](file:///home/it/aws-active-directory-lab/docs/security-and-networking.md)*
