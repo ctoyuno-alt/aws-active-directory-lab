@@ -66,5 +66,21 @@ repadmin /replsummary
 - A previous Terraform operation crashed or was interrupted.
 - Run `terraform force-unlock <LOCK-ID>` after verifying no other team member or pipeline is actively running `apply`.
 
+### 5. Failed to Create User `ssm-user` on Domain Controller
+
+**Symptom**: `aws ssm start-session` fails with:
+`Unable to start command: Failed to create user ssm-user: Instance is running active directory domain controller service.`
+
+**Root Cause**:
+Active Directory Domain Controllers disable local SAM user accounts (`Win32_UserAccount`). When AWS SSM Session Manager attempts to create a local OS user named `ssm-user` via local SAM APIs, Windows rejects the request because user management must be performed in Active Directory.
+
+**Solutions**:
+- **Solution A (Recommended)**: Create `ssm-user` in Active Directory using the provided automation script via SSM RunCommand:
+  ```bash
+  ./scripts/health-check.sh DC01 --script ./powershell/common/Initialize-SSMUser.ps1
+  ./scripts/health-check.sh DC02 --script ./powershell/common/Initialize-SSMUser.ps1
+  ```
+- **Solution B (Remote Diagnostics)**: Run scripts remotely via `./scripts/health-check.sh`, which executes under `NT AUTHORITY\SYSTEM` and bypasses OS user creation completely.
+
 ---
 *Back to: [Architecture Overview](file:///home/it/aws-active-directory-lab/docs/architecture.md) | [Deployment Guide](file:///home/it/aws-active-directory-lab/docs/deployment-guide.md)*

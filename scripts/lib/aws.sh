@@ -14,9 +14,9 @@ _AWS_SH_LOADED=1
 # ------------------------------------------------------------------------------
 # Function: get_instance_id
 # Purpose:  Resolves an instance ID given a target (Instance ID, Hostname tag,
-#           or Name tag).
+#           or Name tag). Handles case-insensitive target matching.
 # Arguments:
-#   $1 - Target string (e.g. DC01, DC02, or i-0123456789abcdef0)
+#   $1 - Target string (e.g. DC01, dc01, DC02, or i-0123456789abcdef0)
 #   $2 - (Optional) AWS Region
 # Outputs:
 #   Instance ID string to stdout if found, empty if not found.
@@ -42,20 +42,23 @@ get_instance_id() {
         region=$(aws_cli configure get region 2>/dev/null || echo "ap-south-1")
     fi
 
-    # 2. Search by Hostname tag
+    local target_lower="${target,,}"
+    local target_upper="${target^^}"
+
+    # 2. Search by Hostname tag (case variants)
     local instance_id
     instance_id=$(aws_cli ec2 describe-instances \
         --region "$region" \
-        --filters "Name=tag:Hostname,Values=${target}" "Name=instance-state-name,Values=running" \
-        --query "Reservations[].Instances[].InstanceId" \
+        --filters "Name=tag:Hostname,Values=${target},${target_lower},${target_upper}" "Name=instance-state-name,Values=running" \
+        --query "Reservations[].Instances[0].InstanceId" \
         --output text 2>/dev/null || true)
 
-    # 3. Fallback: Search by Name tag pattern
+    # 3. Fallback: Search by Name tag pattern (case variants)
     if [ -z "$instance_id" ] || [ "$instance_id" == "None" ]; then
         instance_id=$(aws_cli ec2 describe-instances \
             --region "$region" \
-            --filters "Name=tag:Name,Values=*${target}*" "Name=instance-state-name,Values=running" \
-            --query "Reservations[].Instances[].InstanceId" \
+            --filters "Name=tag:Name,Values=*${target}*,*${target_lower}*,*${target_upper}*" "Name=instance-state-name,Values=running" \
+            --query "Reservations[].Instances[0].InstanceId" \
             --output text 2>/dev/null || true)
     fi
 

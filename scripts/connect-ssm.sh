@@ -33,12 +33,12 @@ TARGET:
 
 Options:
   -p, --profile PROFILE   AWS CLI profile to use (or set AWS_PROFILE env var)
-  -w, --powershell        Start an interactive PowerShell session (AWS-StartPSSession)
+  -w, --powershell        Start an interactive PowerShell session
   -r, --region REGION     AWS Region (default: derived from AWS CLI config)
   -h, --help              Display this help message and exit
 
 Examples:
-  $(basename "$0") DC01
+  $(basename "$0") DC01 --profile aws-ad-lab
   $(basename "$0") DC02 --powershell --profile aws-ad-lab
   $(basename "$0") i-0123456789abcdef0
 EOF
@@ -93,10 +93,16 @@ log_success "Target resolved to Instance ID: ${INSTANCE_ID}"
 
 if [ "$MODE" == "powershell" ]; then
     log_info "Initiating SSM PowerShell session..."
-    aws_cli ssm start-session \
+    if ! aws_cli ssm start-session \
         --region "$REGION" \
         --target "$INSTANCE_ID" \
-        --document-name AWS-StartPSSession
+        --document-name AWS-StartPSSession 2>/dev/null; then
+        log_warn "AWS-StartPSSession document unavailable in region ${REGION}. Falling back to standard SSM session..."
+        log_info "Tip: Type 'powershell' inside the session prompt to launch PowerShell."
+        aws_cli ssm start-session \
+            --region "$REGION" \
+            --target "$INSTANCE_ID"
+    fi
 else
     log_info "Initiating SSM session..."
     aws_cli ssm start-session \
