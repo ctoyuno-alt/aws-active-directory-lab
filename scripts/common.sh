@@ -14,6 +14,12 @@ _COMMON_SH_LOADED=1
 
 # --- Global AWS Profile & Region ---
 AWS_PROFILE="${AWS_PROFILE:-}"
+if [ -z "$AWS_PROFILE" ]; then
+    # Fallback to aws-ad-lab if it exists in local aws profiles
+    if aws configure list-profiles 2>/dev/null | grep -q "^aws-ad-lab$"; then
+        AWS_PROFILE="aws-ad-lab"
+    fi
+fi
 
 # --- Terminal Color Definitions ---
 RED='\033[0;31m'
