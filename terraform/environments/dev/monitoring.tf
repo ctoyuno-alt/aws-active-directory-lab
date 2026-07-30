@@ -5,7 +5,7 @@ module "monitoring" {
   environment  = var.environment
   aws_region   = var.aws_region
 
-  instance_id = module.dc01.instance_id
+  instance_id = module.windows_servers["dc01"].instance_id
 
   log_retention_days = 30
 

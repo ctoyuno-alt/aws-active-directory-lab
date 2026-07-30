@@ -68,3 +68,20 @@ variable "domain_admin_password" {
   type      = string
   sensitive = true
 }
+
+variable "fs01_instance_type" {
+  description = "Instance type for FS01"
+  type        = string
+  default     = "t3.large"
+}
+
+variable "fs01_private_ip" {
+  description = "Private IP for FS01"
+  type        = string
+}
+
+variable "fs01_root_volume_size" {
+  description = "Root volume size for FS01"
+  type        = number
+  default     = 50
+}
