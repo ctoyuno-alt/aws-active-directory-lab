@@ -1,6 +1,10 @@
 <#
 .SYNOPSIS
     Initializes Windows server provisioning.
+.DESCRIPTION
+    Initializes the bootstrap state and registers the scheduled task to ensure
+    provisioning continues on reboots. Kicks off Continue-Bootstrap.ps1 to start
+    the state machine execution.
 #>
 
 [CmdletBinding()]
@@ -19,10 +23,9 @@ param(
 . "$PSScriptRoot\Bootstrap-State.ps1"
 . "$PSScriptRoot\Register-BootstrapTask.ps1"
 . "$PSScriptRoot\..\common\Logging.ps1"
-. "$PSScriptRoot\..\common\Rename-Computer.ps1"
 
 Write-BootstrapLog "===================================================="
-Write-BootstrapLog "Bootstrap Framework Started"
+Write-BootstrapLog "Bootstrap Framework Initialization Started"
 Write-BootstrapLog "Hostname : $Hostname"
 Write-BootstrapLog "Role     : $Role"
 Write-BootstrapLog "Domain   : $Domain"
@@ -31,40 +34,22 @@ Write-BootstrapLog "Domain   : $Domain"
 $state = Get-BootstrapState
 
 if ($null -eq $state) {
-
     Write-BootstrapLog "Creating initial bootstrap state."
-
     Save-BootstrapState @{
         Hostname = $Hostname
         Domain   = $Domain
         Role     = $Role
         Stage    = "Initial"
     }
+} else {
+    Write-BootstrapLog "Bootstrap state already exists. Current Stage: $($state.Stage)"
 }
 
 # Register scheduled task
 Register-BootstrapTask `
     -ScriptPath "C:\bootstrap\Continue-Bootstrap.ps1"
 
-# Rename computer if necessary
-$current = $env:COMPUTERNAME
+Write-BootstrapLog "Bootstrap initialization complete. Executing state machine."
 
-if ($current -ne $Hostname) {
-
-    Write-BootstrapLog "Renaming computer."
-
-    $state = Get-BootstrapState
-    $state.Stage = "RenameComplete"
-
-    Save-BootstrapState $state
-
-    Rename-Computer `
-        -NewName $Hostname `
-        -Restart
-
-    return
-}
-
-Write-BootstrapLog "Computer already renamed."
-
-Write-BootstrapLog "Bootstrap initialization complete."
+# Kick off Continue-Bootstrap.ps1
+& "$PSScriptRoot\Continue-Bootstrap.ps1"

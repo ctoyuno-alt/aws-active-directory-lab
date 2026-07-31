@@ -32,7 +32,7 @@ if (Test-Path $renameScript) {
 # Note: If the machine rebooted due to rename, this part will run on the next execution/boot.
 if (Test-Path $joinScript) {
     Write-Host "Running reusable Join-Domain script..."
-    & $joinScript -DomainName "corp.lab" -Restart
+    & $joinScript -DomainName "corp.lab"
 } else {
     Write-Host "Join domain script not found. Running inline..."
     $Password = ConvertTo-SecureString $env:DOMAIN_PASSWORD -AsPlainText -Force

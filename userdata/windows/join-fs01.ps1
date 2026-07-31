@@ -28,7 +28,7 @@ if (Test-Path $renameScript) {
 # Join the domain
 if (Test-Path $joinScript) {
     Write-Host "Running reusable Join-Domain script..."
-    & $joinScript -DomainName "corp.lab" -Restart
+    & $joinScript -DomainName "corp.lab"
 } else {
     throw "Join-Domain.ps1 not found."
 }
