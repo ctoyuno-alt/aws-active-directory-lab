@@ -6,6 +6,11 @@ locals {
     Owner       = "Sahil"
   }
 
+  domain = "corp.lab"
+
+  fs01_hostname = "FS01"
+  fs01_role     = "FileServer"
+
   windows_servers = {
     dc01 = {
       hostname         = "DC01"
@@ -28,13 +33,22 @@ locals {
     }
 
     fs01 = {
-      hostname         = "FS01"
-      role             = "FileServer"
+      hostname         = local.fs01_hostname
+      role             = local.fs01_role
       subnet_id        = module.networking.private_subnet_b_id
       private_ip       = var.fs01_private_ip
       instance_type    = var.fs01_instance_type
       root_volume_size = var.fs01_root_volume_size
-      user_data        = file("${path.root}/../../../userdata/windows/join-fs01.ps1")
+      user_data = templatefile(
+        "${path.root}/../../../userdata/windows/bootstrap.ps1.tftpl",
+        {
+          hostname         = local.fs01_hostname
+          domain           = local.domain
+          role             = local.fs01_role
+          bootstrap_bucket = module.bootstrap.bucket_name
+          bootstrap_key    = module.bootstrap.bootstrap_key
+        }
+      )
     }
   }
 }

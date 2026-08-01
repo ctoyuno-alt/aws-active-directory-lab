@@ -1,0 +1,47 @@
+<powershell>
+
+$BootstrapRoot = "C:\bootstrap"
+$ZipPath       = "$BootstrapRoot\bootstrap.zip"
+
+# 1. Create C:\bootstrap directory
+if (-not (Test-Path $BootstrapRoot)) {
+    New-Item -Path $BootstrapRoot -ItemType Directory -Force
+}
+
+# 2. Download bootstrap.zip from S3 bucket
+if (Get-Command Read-S3Object -ErrorAction SilentlyContinue) {
+    Read-S3Object -BucketName "${bootstrap_bucket}" -Key "${bootstrap_key}" -File $ZipPath
+} else {
+    aws s3 cp "s3://${bootstrap_bucket}/${bootstrap_key}" $ZipPath
+}
+
+if (-not (Test-Path $ZipPath)) {
+    throw "Bootstrap package download failed: $ZipPath not found."
+}
+
+# 3. Extract bootstrap.zip
+Expand-Archive -Path $ZipPath -DestinationPath $BootstrapRoot -Force
+
+if (Test-Path "$BootstrapRoot\powershell\bootstrap") {
+    Copy-Item -Path "$BootstrapRoot\powershell\bootstrap\*" -Destination $BootstrapRoot -Recurse -Force
+}
+if (Test-Path "$BootstrapRoot\powershell\common") {
+    if (-not (Test-Path "$BootstrapRoot\common")) {
+        New-Item -Path "$BootstrapRoot\common" -ItemType Directory -Force
+    }
+    Copy-Item -Path "$BootstrapRoot\powershell\common\*" -Destination "$BootstrapRoot\common" -Recurse -Force
+}
+
+# 4. Run Bootstrap.ps1
+$BootstrapScript = Join-Path $BootstrapRoot "Bootstrap.ps1"
+
+if (-not (Test-Path $BootstrapScript)) {
+    throw "Bootstrap.ps1 not found after extraction."
+}
+
+& $BootstrapScript `
+    -Hostname "${hostname}" `
+    -Domain "${domain}" `
+    -Role "${role}"
+
+</powershell>
