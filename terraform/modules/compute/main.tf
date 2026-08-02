@@ -9,7 +9,8 @@ resource "aws_instance" "this" {
 
   key_name = var.key_name
 
-  user_data = var.user_data
+  user_data                   = var.user_data
+  user_data_replace_on_change = true
 
   monitoring = true
 

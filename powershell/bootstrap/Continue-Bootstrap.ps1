@@ -7,9 +7,8 @@
     Centralizes all rebooting and stage transitions.
 #>
 
-$Root = Split-Path $PSScriptRoot -Parent
 . "$PSScriptRoot/Bootstrap-State.ps1"
-. "$Root/common/Logging.ps1"
+. "$PSScriptRoot/common/Logging.ps1"
 
 $state = Get-BootstrapState
 
@@ -30,7 +29,7 @@ if ($state.Stage -notin $ValidStages) {
     throw "Invalid stage: $($state.Stage)"
 }
 
-$roleScript = "$PSScriptRoot/../roles/$($state.Role).ps1"
+$roleScript = "$PSScriptRoot/roles/$($state.Role).ps1"
 if (-not (Test-Path $roleScript)) {
     Write-BootstrapLog "Role script not found: $roleScript" -Level ERROR
     throw "Role script not found: $roleScript"

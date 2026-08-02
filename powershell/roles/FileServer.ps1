@@ -15,7 +15,7 @@ param(
 $Root = Split-Path $PSScriptRoot -Parent
 
 . "$Root/common/Logging.ps1"
-. "$Root/bootstrap/Bootstrap-State.ps1"
+. "$Root/Bootstrap-State.ps1"
 
 Write-BootstrapLog "======================================="
 Write-BootstrapLog "File Server Provisioning - Stage: $Stage"

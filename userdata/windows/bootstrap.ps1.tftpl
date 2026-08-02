@@ -9,28 +9,75 @@ if (-not (Test-Path $BootstrapRoot)) {
 }
 
 # 2. Download bootstrap.zip from S3 bucket
-if (Get-Command Read-S3Object -ErrorAction SilentlyContinue) {
-    Read-S3Object -BucketName "${bootstrap_bucket}" -Key "${bootstrap_key}" -File $ZipPath
-} else {
-    aws s3 cp "s3://${bootstrap_bucket}/${bootstrap_key}" $ZipPath
-}
+Import-Module AWSPowerShell -ErrorAction Stop
+
+Write-Output "Downloading bootstrap package..."
+
+Read-S3Object `
+    -BucketName "${bootstrap_bucket}" `
+    -Key "${bootstrap_key}" `
+    -File $ZipPath `
+    -ErrorAction Stop
 
 if (-not (Test-Path $ZipPath)) {
     throw "Bootstrap package download failed: $ZipPath not found."
 }
 
 # 3. Extract bootstrap.zip
+if (Test-Path "$BootstrapRoot\powershell") {
+    Remove-Item "$BootstrapRoot\powershell" -Recurse -Force
+}
+
 Expand-Archive -Path $ZipPath -DestinationPath $BootstrapRoot -Force
 
-if (Test-Path "$BootstrapRoot\powershell\bootstrap") {
-    Copy-Item -Path "$BootstrapRoot\powershell\bootstrap\*" -Destination $BootstrapRoot -Recurse -Force
-}
-if (Test-Path "$BootstrapRoot\powershell\common") {
-    if (-not (Test-Path "$BootstrapRoot\common")) {
-        New-Item -Path "$BootstrapRoot\common" -ItemType Directory -Force
+$RequiredDirectories = @(
+    "bootstrap",
+    "common",
+    "roles",
+    "dc01",
+    "dc02"
+)
+
+foreach ($Directory in $RequiredDirectories) {
+    $Source = Join-Path "$BootstrapRoot\powershell" $Directory
+    if (-not (Test-Path $Source)) {
+        throw "Bootstrap package is missing required directory '$Directory'."
     }
-    Copy-Item -Path "$BootstrapRoot\powershell\common\*" -Destination "$BootstrapRoot\common" -Recurse -Force
 }
+
+Write-Output "Copying bootstrap framework..."
+
+Copy-Item "$BootstrapRoot\powershell\bootstrap\*" `
+    -Destination $BootstrapRoot `
+    -Recurse `
+    -Force
+
+Copy-Item "$BootstrapRoot\powershell\common" `
+    -Destination $BootstrapRoot `
+    -Recurse `
+    -Force
+
+Copy-Item "$BootstrapRoot\powershell\roles" `
+    -Destination $BootstrapRoot `
+    -Recurse `
+    -Force
+
+Copy-Item "$BootstrapRoot\powershell\dc01" `
+    -Destination $BootstrapRoot `
+    -Recurse `
+    -Force
+
+Copy-Item "$BootstrapRoot\powershell\dc02" `
+    -Destination $BootstrapRoot `
+    -Recurse `
+    -Force
+
+# Clean up temporary zip and extracted powershell directory
+Remove-Item $ZipPath -Force
+
+Remove-Item "$BootstrapRoot\powershell" `
+    -Recurse `
+    -Force
 
 # 4. Run Bootstrap.ps1
 $BootstrapScript = Join-Path $BootstrapRoot "Bootstrap.ps1"

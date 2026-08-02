@@ -22,7 +22,7 @@ param(
 # Import framework
 . "$PSScriptRoot\Bootstrap-State.ps1"
 . "$PSScriptRoot\Register-BootstrapTask.ps1"
-. "$PSScriptRoot\..\common\Logging.ps1"
+. "$PSScriptRoot\common\Logging.ps1"
 
 Write-BootstrapLog "===================================================="
 Write-BootstrapLog "Bootstrap Framework Initialization Started"

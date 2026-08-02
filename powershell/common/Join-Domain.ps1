@@ -18,6 +18,9 @@ param(
     [string]$DomainName,
 
     [Parameter(Mandatory = $false)]
+    [string[]]$DnsServers = @("10.10.10.10", "10.10.20.10"),
+
+    [Parameter(Mandatory = $false)]
     [System.Management.Automation.PSCredential]$Credential
 )
 
@@ -30,6 +33,18 @@ $sysInfo = Get-CimInstance -ClassName Win32_ComputerSystem
 if ($sysInfo.PartOfDomain -and ($sysInfo.Domain -ieq $DomainName)) {
     Write-BootstrapLog "Computer is already joined to the domain '$DomainName'."
     return
+}
+
+if ($DnsServers -and $DnsServers.Count -gt 0) {
+    $dnsScript = "$PSScriptRoot/Set-DnsServer.ps1"
+    if (Test-Path $dnsScript) {
+        Write-BootstrapLog "Configuring DNS servers: $($DnsServers -join ', ')"
+        & $dnsScript -DnsServers $DnsServers
+    } else {
+        Write-BootstrapLog "Set-DnsServer.ps1 not found, setting DNS inline..." -Level WARNING
+        $adapter = Get-NetAdapter | Where-Object Status -eq "Up" | Select-Object -First 1
+        Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses $DnsServers
+    }
 }
 
 # Resolve credential if not provided
