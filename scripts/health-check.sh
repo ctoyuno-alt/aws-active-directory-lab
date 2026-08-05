@@ -97,8 +97,28 @@ COMMAND_ID=""
 
 if [ -f "$SCRIPT_TO_SEND" ]; then
     log_info "Uploading and executing local script '${SCRIPT_TO_SEND}' on ${TARGET} (${INSTANCE_ID})..."
-    SCRIPT_JSON=$(jq -sR . "$SCRIPT_TO_SEND")
-    PARAMETERS_JSON="{\"commands\":[${SCRIPT_JSON}]}"
+    
+    SCRIPT_DIR_TO_SEND="$(cd "$(dirname "$SCRIPT_TO_SEND")" && pwd)"
+    TARGET_SCRIPT_NAME="$(basename "$SCRIPT_TO_SEND")"
+
+    # Build commands array for SSM using Base64 encoding for safe file creation
+    COMMANDS_JSON=$(jq -n \
+        '["New-Item -ItemType Directory -Path \"$env:TEMP\\ssm_exec\" -Force | Out-Null"]')
+
+    for ps_file in "${SCRIPT_DIR_TO_SEND}"/*.ps1; do
+        if [ -f "$ps_file" ]; then
+            fname="$(basename "$ps_file")"
+            b64_content=$(base64 -w 0 "$ps_file")
+            ps_write_cmd="[System.IO.File]::WriteAllBytes(\"\$env:TEMP\\ssm_exec\\${fname}\", [System.Convert]::FromBase64String(\"${b64_content}\"))"
+            COMMANDS_JSON=$(echo "$COMMANDS_JSON" | jq --arg cmd "$ps_write_cmd" '. + [$cmd]')
+        fi
+    done
+
+    COMMANDS_JSON=$(echo "$COMMANDS_JSON" | jq \
+        --arg targetName "$TARGET_SCRIPT_NAME" \
+        '. + ["& \"$env:TEMP\\\\ssm_exec\\\\" + $targetName + "\""]')
+
+    PARAMETERS_JSON=$(jq -n --argjson cmds "$COMMANDS_JSON" '{commands: $cmds}')
 
     COMMAND_ID=$(aws_cli ssm send-command \
         --region "$REGION" \

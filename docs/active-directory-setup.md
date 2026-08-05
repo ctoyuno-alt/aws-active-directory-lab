@@ -140,11 +140,15 @@ All valid stages are defined centrally in `Bootstrap-State.ps1`:
 Run `./scripts/health-check.sh` from your local Linux workstation. The script dynamically streams the local repository script content directly to the target instance via AWS SSM:
 
 ```bash
-# Execute health check on DC01
-./scripts/health-check.sh DC01
+# Execute full validation suite on DC01
+./scripts/health-check.sh DC01 --script ./powershell/validation/Test-Lab.ps1
 
-# Execute custom script on DC02
-./scripts/health-check.sh DC02 --script ./powershell/dc02/Validate-Replication.ps1
+# Execute specific validation test (AD Health, Replication, DNS, GPO, File Server)
+./scripts/health-check.sh DC01 --script ./powershell/validation/Test-ADHealth.ps1
+./scripts/health-check.sh DC02 --script ./powershell/validation/Test-Replication.ps1
+./scripts/health-check.sh DC01 --script ./powershell/validation/Test-DNS.ps1
+./scripts/health-check.sh DC01 --script ./powershell/validation/Test-GPO.ps1
+./scripts/health-check.sh FS01 --script ./powershell/validation/Test-FileServer.ps1
 ```
 
 ### Method 2: Manual Execution via SSM Session Manager
@@ -152,17 +156,25 @@ Run `./scripts/health-check.sh` from your local Linux workstation. The script dy
 Connect to the instance via SSM Session Manager and invoke the script directly from the standard automation path:
 
 ```powershell
-# Execute health check script on instance
-& C:\Automation\powershell\common\Test-ADHealth.ps1
+# Execute full lab validation suite on instance
+& C:\Automation\powershell\validation\Test-Lab.ps1
 
-# Execute replication validation script on DC02
-& C:\Automation\powershell\dc02\Validate-Replication.ps1
+# Execute individual validation scripts
+& C:\Automation\powershell\validation\Test-ADHealth.ps1
+& C:\Automation\powershell\validation\Test-Replication.ps1
+& C:\Automation\powershell\validation\Test-DNS.ps1
+& C:\Automation\powershell\validation\Test-GPO.ps1
+& C:\Automation\powershell\validation\Test-FileServer.ps1
 ```
 
 **Expected Output**:
 - Services (`NTDS`, `DNS`, `Kdc`, `ADWS`, `DFSR`): **Running**
 - Active Directory Module: **Loaded**
 - DCDiag Services & Replication: **Pass**
+- Active Directory Replication: **0 Errors across 5 Naming Contexts**
+- DNS Resolution: **`corp.lab`, `DC01`, `DC02`, `FS01` resolved**
+- Group Policy RSOP: **Computer baseline and domain policies applied**
+- File Share Permissions: **SMB shares and NTFS ACLs verified**
 - Overall AD Health: **PASS**
 
 ---
