@@ -6,7 +6,7 @@
 # Supports copying passwords directly to clipboard (wl-copy, xclip, pbcopy).
 # ==============================================================================
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

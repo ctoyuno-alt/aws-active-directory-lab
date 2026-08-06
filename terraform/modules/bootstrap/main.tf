@@ -32,7 +32,7 @@ resource "aws_s3_bucket_public_access_block" "bootstrap" {
 }
 
 locals {
-  artifact_source = coalesce(var.artifact_source, "${path.root}/../../../artifacts/bootstrap.zip")
+  artifact_source = coalesce(var.artifact_source, "${path.root}/../../artifacts/bootstrap.zip")
 }
 
 resource "aws_s3_object" "bootstrap_zip" {

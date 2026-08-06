@@ -6,7 +6,7 @@
 # across Terraform modules and environments before committing code.
 # ==============================================================================
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -20,7 +20,7 @@ else
     exit 1
 fi
 
-ENV="dev"
+ENV="all"
 SKIP_PLAN=false
 
 show_help() {
@@ -33,7 +33,7 @@ Runs pre-commit checks on Terraform code:
   3. terraform plan
 
 Options:
-  -e, --env ENVIRONMENT   Environment to validate (default: dev)
+  -e, --env ENVIRONMENT   Environment to validate (e.g. dev, prod, or 'all', default: all)
   -p, --profile PROFILE   AWS CLI profile to use (or set AWS_PROFILE env var)
   --skip-plan             Skip terraform plan phase (formatting & validate only)
   -h, --help              Display this help message and exit
@@ -121,8 +121,17 @@ validate_directory() {
 # 2. Validate bootstrap directory
 validate_directory "${ROOT_DIR}/bootstrap" "bootstrap"
 
-# 3. Validate target environment directory
-validate_directory "${ROOT_DIR}/terraform/environments/${ENV}" "environment:${ENV}"
+# 3. Validate target environment directories
+if [ "$ENV" = "all" ]; then
+    for env_dir in "${ROOT_DIR}/terraform/environments"/*; do
+        if [ -d "$env_dir" ]; then
+            env_name="$(basename "$env_dir")"
+            validate_directory "$env_dir" "environment:${env_name}"
+        fi
+    done
+else
+    validate_directory "${ROOT_DIR}/terraform/environments/${ENV}" "environment:${ENV}"
+fi
 
 log_success "=========================================================="
 log_success "All pre-commit validations passed successfully!"

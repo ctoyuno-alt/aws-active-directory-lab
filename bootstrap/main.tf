@@ -27,7 +27,7 @@ resource "aws_s3_object" "bootstrap_zip" {
 
   key = "bootstrap/bootstrap.zip"
 
-  source = "${path.root}/../../../artifacts/bootstrap.zip"
+  source = "${path.root}/../artifacts/bootstrap.zip"
 
-  etag = filemd5("${path.root}/../../../artifacts/bootstrap.zip")
+  etag = fileexists("${path.root}/../artifacts/bootstrap.zip") ? filemd5("${path.root}/../artifacts/bootstrap.zip") : null
 }

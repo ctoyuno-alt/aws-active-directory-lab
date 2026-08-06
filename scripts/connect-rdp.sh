@@ -5,7 +5,7 @@
 # Establish a secure RDP tunnel to DC01/DC02 using AWS SSM Port Forwarding.
 # ==============================================================================
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

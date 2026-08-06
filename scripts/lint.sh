@@ -9,7 +9,7 @@
 #   4. PSScriptAnalyzer (PowerShell script validation via pwsh)
 # ==============================================================================
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -23,7 +23,7 @@ else
     exit 1
 fi
 
-ENV="dev"
+ENV="all"
 
 show_help() {
     cat <<EOF
@@ -35,7 +35,7 @@ Runs complete linting and static analysis suite:
   - PowerShell PSScriptAnalyzer linting
 
 Options:
-  -e, --env ENVIRONMENT   Environment to validate (default: dev)
+  -e, --env ENVIRONMENT   Environment to validate (e.g. dev, prod, or 'all', default: all)
   -p, --profile PROFILE   AWS CLI profile to use (or set AWS_PROFILE env var)
   -h, --help              Display this help message and exit
 
@@ -112,7 +112,17 @@ validate_tf_dir() {
 }
 
 validate_tf_dir "${ROOT_DIR}/bootstrap" "bootstrap"
-validate_tf_dir "${ROOT_DIR}/terraform/environments/${ENV}" "environment:${ENV}"
+
+if [ "$ENV" = "all" ]; then
+    for env_dir in "${ROOT_DIR}/terraform/environments"/*; do
+        if [ -d "$env_dir" ]; then
+            env_name="$(basename "$env_dir")"
+            validate_tf_dir "$env_dir" "environment:${env_name}"
+        fi
+    done
+else
+    validate_tf_dir "${ROOT_DIR}/terraform/environments/${ENV}" "environment:${ENV}"
+fi
 
 # ------------------------------------------------------------------------------
 # 3. Bash Scripts Validation (ShellCheck / bash -n)

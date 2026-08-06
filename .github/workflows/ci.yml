@@ -5,26 +5,86 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     name: Lint & Validate Codebase
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: 1.13.0
 
+      - name: Configure Terraform Plugin Cache
+        run: |
+          mkdir -p ~/.terraform.d/plugin-cache
+          echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
+
+      - name: Cache Terraform Plugins
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -Force -Scope CurrentUser
+
       - name: Make scripts executable
         run: chmod +x scripts/*.sh scripts/lib/*.sh
+
+      - name: Package Bootstrap Artifacts
+        run: ./scripts/package-bootstrap.sh
+
+      - name: Verify Bootstrap Artifact
+        run: |
+          test -f artifacts/bootstrap.zip
+          unzip -l artifacts/bootstrap.zip
+
+      - name: Upload Bootstrap Artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: bootstrap
+          path: artifacts/bootstrap.zip
 
       - name: Run Linting Suite
         run: ./scripts/lint.sh
 
       - name: Run Pre-Commit Validation (Skip Plan)
         run: ./scripts/validate.sh --skip-plan
+
+      - name: Run Pester Tests
+        shell: pwsh
+        run: |
+          Invoke-Pester ./tests/pester -CI
+
+      - name: Build Summary
+        run: |
+          {
+            echo "## CI Summary"
+            echo ""
+            echo "- Terraform validation: ✅"
+            echo "- Linting: ✅"
+            echo "- Bootstrap packaging: ✅"
+            echo "- Pester unit tests: ✅"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -5,7 +5,7 @@
 # Easily open an AWS SSM Session Manager shell or PowerShell session to DC01/DC02.
 # ==============================================================================
 
-set -euo pipefail
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
